@@ -1,39 +1,83 @@
 <template>
   <div class="navbar">
-    <div class="navbar-items order-3 grow-3">
-      <select
-        @change="changePathfindingAlgorithm($event)"
-        :model="PATHFINDING_ALGORITHM"
-      >
-        <option value="1">A* Algorithm</option>
-        <option value="2">Djikstra Algorithm</option>
-        <option value="3">DFS Algorithm</option>
-        <option value="4">BFS Algorithm</option>
-      </select>
-      <button v-on:click="findPath">Find Path</button>
-    </div>
-    <div class="navbar-items order-2 grow-1">
-      <select
-        @change="changeMazeGeneratorAlgorithm($event)"
-        :model="MAZE_GENERATION_ALGORITHM"
-      >
-        <option value="1">Recursive Back Tracking Algorithm</option>
-        <option value="2">Prim's Algorithm</option>
-      </select>
-      <button v-on:click="generateMaze">Generate Maze</button>
-    </div>
     <div class="navbar-items order-1 grow-1">
-      <h3 class="navbar-title">Pathfinding & Maze Generator<br />Visualizer</h3>
+      <h5 class="navbar-title">Pathfinding & Maze Generator<br />Visualizer</h5>
+    </div>
+    <div
+      class="navbar-items order-3 grow-3 row row-cols-sm-auto g-3 align-items-center"
+    >
+      <div class="col-12">
+        <select
+          class="form-select form-select-sm"
+          @change="changePathfindingAlgorithm($event)"
+          :model="PATHFINDING_ALGORITHM"
+        >
+          <option value="1">A* Algorithm</option>
+          <option value="2">Djikstra Algorithm</option>
+          <option value="3">DFS Algorithm</option>
+          <option value="4">BFS Algorithm</option>
+        </select>
+      </div>
+      <div class="col-12">
+        <button class="btn btn-primary btn-sm" v-on:click="findPath">
+          Find Path
+        </button>
+      </div>
+    </div>
+    <div
+      class="navbar-items order-2 grow-1 row row-cols-sm-auto g-3 align-items-center"
+    >
+      <div class="col-12">
+        <select
+          class="form-select form-select-sm"
+          @change="changeMazeGeneratorAlgorithm($event)"
+          :model="MAZE_GENERATION_ALGORITHM"
+        >
+          <option value="1">Recursive Back Tracking Algorithm</option>
+          <option value="2">Prim's Algorithm</option>
+        </select>
+      </div>
+      <div class="col-12">
+        <button class="btn btn-danger btn-sm" v-on:click="generateMaze">
+          Generate Maze
+        </button>
+      </div>
+    </div>
+  </div>
+  <div id="detail">
+    <div>
+      <div class="node-start"></div>
+      <p>Start Node</p>
+    </div>
+    <div>
+      <div class="node-finish"></div>
+      <p>Finish Node</p>
+    </div>
+    <div>
+      <div class="node-discovered"></div>
+      <p>Discovered Node</p>
+    </div>
+    <div>
+      <div class="node-visited"></div>
+      <p>Visited Node</p>
+    </div>
+    <div>
+      <div class="node-shortest-path"></div>
+      <p>Path Node</p>
+    </div>
+    <div>
+      <div class="node-wall"></div>
+      <p>Wall Node</p>
     </div>
   </div>
   <div class="grid" id="grid">
-    <div class="row" v-for="row in state.grid" :key="row">
+    <div class="row-x" v-for="row in state.grid" :key="row">
       <Node
         v-for="node in row"
         :key="node"
         :col="node.y"
         :row="node.x"
-        :isWall="true"
+        :isWall="node.isWalkable"
         @click.left="onMouseLeftClick(node.x, node.y)"
         @click.right.prevent="onMouseRightClick(node.x, node.y)"
       />
@@ -43,7 +87,6 @@
 
 <script>
 import Node from "./Node/Node.vue";
-import { useWindowSize } from "vue-window-size";
 import Nodes from "../algorithms/node/node";
 import AStar from "../algorithms/pathfinding/a-star";
 import RecursiveBackTracking from "../algorithms/maze_generator/recursivebacktracking";
@@ -55,14 +98,6 @@ export default {
     Node,
   },
 
-  setup() {
-    const { width, height } = useWindowSize();
-    return {
-      windowWidth: width,
-      windowHeight: height,
-    };
-  },
-
   data: function () {
     return {
       PATHFINDING_ALGORITHM: "1",
@@ -71,17 +106,13 @@ export default {
         grid: null,
         mousePressed: false,
       },
-      dimentionContainer: {
-        width: this.windowWidth,
-        height: this.windowHeight,
-      },
       nodeSize: {
         x: 10,
         y: 10,
       },
       gridSize: {
-        x: Math.floor(this.windowHeight / 10),
-        y: Math.floor(this.windowWidth / 10),
+        x: 0,
+        y: 0,
       },
       START_NODE_ROW: null,
       START_NODE_COL: null,
@@ -91,7 +122,6 @@ export default {
   },
 
   mounted() {
-    console.log(this.PATHFINDING_ALGORITHM);
     this.state.grid = this.getInitialGrid();
   },
 
@@ -106,10 +136,17 @@ export default {
 
     getInitialGrid: function () {
       const grid = [];
+
+      const content = document.getElementById("grid");
+      this.gridSize.x = content.clientHeight / 10;
+      this.gridSize.y = content.clientWidth / 10;
+
+      console.log(this.gridSize)
+
       for (let row = 0; row < this.gridSize.x; row++) {
         const currentRow = [];
         for (let col = 0; col < this.gridSize.y; col++) {
-          currentRow.push(this.createNode(col, row));
+          currentRow.push(this.createNode(col, row, true));
         }
         grid.push(currentRow);
       }
@@ -117,7 +154,6 @@ export default {
     },
 
     findPath: function () {
-      console.log(this.state.grid);
       let result = { path: [], animation: [] };
       switch (this.PATHFINDING_ALGORITHM) {
         case "1":
@@ -158,7 +194,6 @@ export default {
     },
 
     generateMaze: function () {
-      console.log("maze generated");
       let result = null;
       let mgAlgorithm = null;
 
@@ -170,7 +205,6 @@ export default {
               this.gridSize
             );
             result = mgAlgorithm.rbt();
-            console.log(result);
           }
           break;
 
@@ -185,8 +219,8 @@ export default {
       this.animateMazeGenerator(result);
     },
 
-    createNode: function (col, row) {
-      return new Nodes(row, col, false);
+    createNode: function (col, row, isWalkable) {
+      return new Nodes(row, col, isWalkable);
     },
 
     onMouseEnter: function (row, col) {
@@ -204,31 +238,32 @@ export default {
       this.state.mousePressed = false;
     },
 
-    onMouseLeftClick: function(row, col) {
-      if(!this.state.grid[row][col].isWalkable) return
+    onMouseLeftClick: function (row, col) {
+      if (!this.state.grid[row][col].isWalkable) return;
 
-      if(this.START_NODE_ROW !== null && this.START_NODE_COL !== null) 
-        document.getElementById(`node-${this.START_NODE_ROW}-${this.START_NODE_COL}`).className = "node";
-      
-      
-      this.START_NODE_ROW = row
-      this.START_NODE_COL = col
-      document.getElementById(`node-${row}-${col}`).className = "node node-start";
+      if (this.START_NODE_ROW !== null && this.START_NODE_COL !== null)
+        document.getElementById(
+          `node-${this.START_NODE_ROW}-${this.START_NODE_COL}`
+        ).className = "node";
 
-      console.log(this.START_NODE_ROW, this.START_NODE_COL)
+      this.START_NODE_ROW = row;
+      this.START_NODE_COL = col;
+      document.getElementById(`node-${row}-${col}`).className =
+        "node node-start";
     },
 
-    onMouseRightClick: function(row, col) {
-      if(!this.state.grid[row][col].isWalkable) return
+    onMouseRightClick: function (row, col) {
+      if (!this.state.grid[row][col].isWalkable) return;
 
-      if(this.FINISH_NODE_ROW !== null && this.FINISH_NODE_COL !== null)
-        document.getElementById(`node-${this.FINISH_NODE_ROW}-${this.FINISH_NODE_COL}`).className = "node";
+      if (this.FINISH_NODE_ROW !== null && this.FINISH_NODE_COL !== null)
+        document.getElementById(
+          `node-${this.FINISH_NODE_ROW}-${this.FINISH_NODE_COL}`
+        ).className = "node";
 
-      this.FINISH_NODE_ROW = row
-      this.FINISH_NODE_COL = col
-      document.getElementById(`node-${row}-${col}`).className = "node node-finish";
-
-      console.log(this.FINISH_NODE_ROW, this.FINISH_NODE_COL)
+      this.FINISH_NODE_ROW = row;
+      this.FINISH_NODE_COL = col;
+      document.getElementById(`node-${row}-${col}`).className =
+        "node node-finish";
     },
 
     getNewGridWithWallToggled: function (grid, row, col) {
@@ -244,7 +279,6 @@ export default {
       for (let i = 0; i < grid.length; i++) {
         for (let j = 0; j < grid[i].length; j++) {
           setTimeout(() => {
-            // document.getElementById(`node-${i}-${j}`).className = "node node-wall";
             grid[i][j] = {
               ...grid[i][j],
               isWalkable: false,
@@ -285,15 +319,13 @@ export default {
         setTimeout(() => {
           document.getElementById(`node-${node.x}-${node.y}`).className =
             "node";
-        }, 50 * i);
+        }, 30 * i);
 
         this.state.grid[node.x][node.y] = {
           ...this.state.grid[node.x][node.y],
           isWalkable: node.isWalkable,
         };
       }
-
-      console.log(this.state.grid);
     },
   },
 };
@@ -306,7 +338,7 @@ export default {
   flex-wrap: wrap;
   justify-content: center;
   position: absolute;
-  top: 85px;
+  top: 126px;
   left: 0;
   right: 0;
   bottom: 0;
@@ -314,16 +346,48 @@ export default {
   border-top: 1px solid rgb(175, 216, 248);
 }
 
-.grid div.row {
+.grid div.row-x {
   width: 100%;
   display: flex;
+}
+
+div#detail {
+  height: 54px;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-evenly;
+  position: absolute;
+  top: 70px;
+  left: 0;
+  right: 0;
+  overflow: hidden;
+}
+
+div#detail > div {
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
+  justify-content: center;
+  overflow: hidden;
+}
+
+div#detail > div > p {
+  margin: 0;
+  font-size: 12px;
+}
+
+div#detail > div > div {
+  padding: 5px;
+  margin: 5px auto;
+  outline: 1px solid rgb(161, 189, 211);
 }
 
 div.navbar {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 85px;
+  height: 70px;
+  overflow: hidden;
 }
 
 div.navbar-items {
@@ -344,22 +408,6 @@ div.navbar-items.grow-3 {
 
 div.navbar-items.grow-4 {
   flex-grow: 4;
-}
-
-div.navbar-items.order-1 {
-  order: 1;
-}
-
-div.navbar-items.order-2 {
-  order: 2;
-}
-
-div.navbar-items.order-3 {
-  order: 3;
-}
-
-div.navbar-items.order-4 {
-  order: 4;
 }
 
 .navbar > .navbar-items > .navbar-title {

@@ -1,5 +1,3 @@
-import Node from "../node/node";
-
 export default class RecursiveBackTracking {
   constructor(_grid, _gridSize) {
     this.grid = _grid;

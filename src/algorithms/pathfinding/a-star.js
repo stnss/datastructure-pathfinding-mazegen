@@ -107,45 +107,48 @@ export default class AStar {
     /**
      * code below for approach only horizontal and vertical neighbor
      */
-    // const neighborsCoordinate = [
-    //   {x: -1, y: 0},
-    //   {x: 1, y: 0},
-    //   {x: 0, y: 1},
-    //   {x: 0, y: -1}
-    // ]
+    const neighborsCoordinate = [
+      {x: -1, y: 0},
+      {x: 1, y: 0},
+      {x: 0, y: 1},
+      {x: 0, y: -1}
+    ]
 
-    // for(let i = 0; i < neighborsCoordinate.length; i++) {
-    //   const insideX = node.x + neighborsCoordinate[i].x;
-    //   const insideY = node.y + neighborsCoordinate[i].y;
-    //   if (
-    //     insideX >= 0 &&
-    //     insideX < this.gridSize.x &&
-    //     insideY >= 0 &&
-    //     insideY < this.gridSize.y
-    //   ) {
-    //     let n = this.grid[insideX][insideY];
-    //     neighbors.push(n);
-    //   }
-    // }
-
-    for (let x = -1; x <= 1; x++) {
-      for (let y = -1; y <= 1; y++) {
-        if (x == 0 && y == 0) continue;
-
-        const insideX = node.x + x;
-        const insideY = node.y + y;
-
-        if (
-          insideX >= 0 &&
-          insideX < this.gridSize.x &&
-          insideY >= 0 &&
-          insideY < this.gridSize.y
-        ) {
-          let n = this.grid[insideX][insideY];
-          neighbors.push(n);
-        }
+    for(let i = 0; i < neighborsCoordinate.length; i++) {
+      const insideX = node.x + neighborsCoordinate[i].x;
+      const insideY = node.y + neighborsCoordinate[i].y;
+      if (
+        insideX >= 0 &&
+        insideX < this.gridSize.x &&
+        insideY >= 0 &&
+        insideY < this.gridSize.y
+      ) {
+        let n = this.grid[insideX][insideY];
+        neighbors.push(n);
       }
     }
+
+    /**
+     * code below for approach horizontal and vertical and diagonal neighbor
+     */
+    // for (let x = -1; x <= 1; x++) {
+    //   for (let y = -1; y <= 1; y++) {
+    //     if (x == 0 && y == 0) continue;
+
+    //     const insideX = node.x + x;
+    //     const insideY = node.y + y;
+
+    //     if (
+    //       insideX >= 0 &&
+    //       insideX < this.gridSize.x &&
+    //       insideY >= 0 &&
+    //       insideY < this.gridSize.y
+    //     ) {
+    //       let n = this.grid[insideX][insideY];
+    //       neighbors.push(n);
+    //     }
+    //   }
+    // }
 
     return neighbors;
   };
