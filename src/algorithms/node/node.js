@@ -7,4 +7,6 @@ export default class Node {
         this.isVisited = false
         this.isDiscovered = false
     }
+
+
 }

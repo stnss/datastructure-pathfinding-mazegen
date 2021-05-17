@@ -1,11 +1,23 @@
-import NodeAStar from "./node/node_a-star";
+import NodeAStar from "../node/node_a-star";
 
 export default class AStar {
   constructor(_grid, _gridSize) {
-    this.grid = _grid;
+    this.grid = [];
     this.gridSize = _gridSize;
     this.path = [];
     this.animation = []
+    for (let i = 0; i < _grid.length; i++) {
+      let rowAstar = [];
+      for (let j = 0; j < _grid[i].length; j++) {
+        let nodeAstar = new NodeAStar(
+          _grid[i][j].x,
+          _grid[i][j].y,
+          _grid[i][j].isWalkable
+        );
+        rowAstar.push(nodeAstar);
+      }
+      this.grid.push(rowAstar);
+    }
   }
 
   a_star = function(startPos, endPos) {

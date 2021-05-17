@@ -1,10 +1,29 @@
 <template>
   <div class="navbar">
-    <div class="navbar-items order-2 grow-4">
+    <div class="navbar-items order-3 grow-3">
+      <select
+        @change="changePathfindingAlgorithm($event)"
+        :model="PATHFINDING_ALGORITHM"
+      >
+        <option value="1">A* Algorithm</option>
+        <option value="2">Djikstra Algorithm</option>
+        <option value="3">DFS Algorithm</option>
+        <option value="4">BFS Algorithm</option>
+      </select>
       <button v-on:click="findPath">Find Path</button>
     </div>
-    <div class="navbar-items order-1">
-      <h3 class="navbar-title">Pathfinding Visualizer</h3>
+    <div class="navbar-items order-2 grow-1">
+      <select
+        @change="changeMazeGeneratorAlgorithm($event)"
+        :model="MAZE_GENERATION_ALGORITHM"
+      >
+        <option value="1">Recursive Back Tracking Algorithm</option>
+        <option value="2">Prim's Algorithm</option>
+      </select>
+      <button v-on:click="generateMaze">Generate Maze</button>
+    </div>
+    <div class="navbar-items order-1 grow-1">
+      <h3 class="navbar-title">Pathfinding & Maze Generator<br />Visualizer</h3>
     </div>
   </div>
   <div class="grid" id="grid">
@@ -14,12 +33,9 @@
         :key="node"
         :col="node.y"
         :row="node.x"
-        :isFinish="node.y === FINISH_NODE_COL && node.x === FINISH_NODE_ROW"
-        :isStart="node.y === START_NODE_COL && node.x === START_NODE_ROW"
-        :isWall="!node.isWalkable"
-        :isPath="node.isPath"
-        @mouseup.left="onMouseUp"
-        @mousedown.left="onMouseDown(node.x, node.y)"
+        :isWall="true"
+        @click.left="onMouseLeftClick(node.x, node.y)"
+        @click.right.prevent="onMouseRightClick(node.x, node.y)"
       />
     </div>
   </div>
@@ -28,8 +44,10 @@
 <script>
 import Node from "./Node/Node.vue";
 import { useWindowSize } from "vue-window-size";
-import NodeAStar from "../algorithms/node/node_a-star";
-import AStar from "../algorithms/a-star";
+import Nodes from "../algorithms/node/node";
+import AStar from "../algorithms/pathfinding/a-star";
+import RecursiveBackTracking from "../algorithms/maze_generator/recursivebacktracking";
+import Prims from "../algorithms/maze_generator/prims";
 
 export default {
   name: "Grid",
@@ -47,6 +65,8 @@ export default {
 
   data: function () {
     return {
+      PATHFINDING_ALGORITHM: "1",
+      MAZE_GENERATION_ALGORITHM: "1",
       state: {
         grid: null,
         mousePressed: false,
@@ -63,18 +83,27 @@ export default {
         x: Math.floor(this.windowHeight / 10),
         y: Math.floor(this.windowWidth / 10),
       },
-      START_NODE_ROW: 10,
-      START_NODE_COL: 15,
-      FINISH_NODE_ROW: 42,
-      FINISH_NODE_COL: 120,
+      START_NODE_ROW: null,
+      START_NODE_COL: null,
+      FINISH_NODE_ROW: null,
+      FINISH_NODE_COL: null,
     };
   },
 
   mounted() {
+    console.log(this.PATHFINDING_ALGORITHM);
     this.state.grid = this.getInitialGrid();
   },
 
   methods: {
+    changePathfindingAlgorithm: function (event) {
+      this.PATHFINDING_ALGORITHM = event.target.value;
+    },
+
+    changeMazeGeneratorAlgorithm: function (event) {
+      this.MAZE_GENERATION_ALGORITHM = event.target.value;
+    },
+
     getInitialGrid: function () {
       const grid = [];
       for (let row = 0; row < this.gridSize.x; row++) {
@@ -88,17 +117,76 @@ export default {
     },
 
     findPath: function () {
-      let astar = new AStar(this.state.grid, this.gridSize);
-      const result = astar.a_star(
-        { x: this.START_NODE_ROW, y: this.START_NODE_COL, isWalkable: true },
-        { x: this.FINISH_NODE_ROW, y: this.FINISH_NODE_COL, isWalkable: true }
-      );
-      
-      this.animatePathFindingAlgorithm(result.animation)
+      console.log(this.state.grid);
+      let result = { path: [], animation: [] };
+      switch (this.PATHFINDING_ALGORITHM) {
+        case "1":
+          {
+            let astar = new AStar(this.state.grid, this.gridSize);
+            result = astar.a_star(
+              {
+                x: this.START_NODE_ROW,
+                y: this.START_NODE_COL,
+                isWalkable: true,
+              },
+              {
+                x: this.FINISH_NODE_ROW,
+                y: this.FINISH_NODE_COL,
+                isWalkable: true,
+              }
+            );
+          }
+          break;
+        case "2":
+          {
+            console.log("This algorithm not implemented yet.");
+          }
+          break;
+        case "3":
+          {
+            console.log("This algorithm not implemented yet.");
+          }
+          break;
+        case "4":
+          {
+            console.log("This algorithm not implemented yet.");
+          }
+          break;
+      }
+
+      this.animatePathFindingAlgorithm(result.animation);
+    },
+
+    generateMaze: function () {
+      console.log("maze generated");
+      let result = null;
+      let mgAlgorithm = null;
+
+      switch (this.MAZE_GENERATION_ALGORITHM) {
+        case "1":
+          {
+            mgAlgorithm = new RecursiveBackTracking(
+              this.state.grid,
+              this.gridSize
+            );
+            result = mgAlgorithm.rbt();
+            console.log(result);
+          }
+          break;
+
+        case "2":
+          {
+            mgAlgorithm = new Prims(this.state.grid, this.gridSize);
+            result = mgAlgorithm.prims();
+          }
+          break;
+      }
+
+      this.animateMazeGenerator(result);
     },
 
     createNode: function (col, row) {
-      return new NodeAStar(row, col, true);
+      return new Nodes(row, col, false);
     },
 
     onMouseEnter: function (row, col) {
@@ -116,6 +204,33 @@ export default {
       this.state.mousePressed = false;
     },
 
+    onMouseLeftClick: function(row, col) {
+      if(!this.state.grid[row][col].isWalkable) return
+
+      if(this.START_NODE_ROW !== null && this.START_NODE_COL !== null) 
+        document.getElementById(`node-${this.START_NODE_ROW}-${this.START_NODE_COL}`).className = "node";
+      
+      
+      this.START_NODE_ROW = row
+      this.START_NODE_COL = col
+      document.getElementById(`node-${row}-${col}`).className = "node node-start";
+
+      console.log(this.START_NODE_ROW, this.START_NODE_COL)
+    },
+
+    onMouseRightClick: function(row, col) {
+      if(!this.state.grid[row][col].isWalkable) return
+
+      if(this.FINISH_NODE_ROW !== null && this.FINISH_NODE_COL !== null)
+        document.getElementById(`node-${this.FINISH_NODE_ROW}-${this.FINISH_NODE_COL}`).className = "node";
+
+      this.FINISH_NODE_ROW = row
+      this.FINISH_NODE_COL = col
+      document.getElementById(`node-${row}-${col}`).className = "node node-finish";
+
+      console.log(this.FINISH_NODE_ROW, this.FINISH_NODE_COL)
+    },
+
     getNewGridWithWallToggled: function (grid, row, col) {
       grid[row][col] = {
         ...grid[row][col],
@@ -125,23 +240,60 @@ export default {
       return grid;
     },
 
-    animatePathFindingAlgorithm: function(animation) {
-      for(let i = 0; i < animation.length; i++) {
-        setTimeout(() => {
-          const node = animation[i]
-
-          if(node.x !== this.START_NODE_ROW || node.y !== this.START_NODE_COL){
-            if(node.isDiscovered && node.isVisited && node.isPath){
-              console.log(node)
-              document.getElementById(`node-${node.x}-${node.y}`).className = 'node node-shortest-path';
-            }
-            else if(node.isDiscovered && node.isVisited && !node.isPath)
-              document.getElementById(`node-${node.x}-${node.y}`).className = 'node node-visited';
-            else
-              document.getElementById(`node-${node.x}-${node.y}`).className = 'node node-discovered';
-          }
-        }, 50 * i)
+    setAllWall: function (grid) {
+      for (let i = 0; i < grid.length; i++) {
+        for (let j = 0; j < grid[i].length; j++) {
+          setTimeout(() => {
+            // document.getElementById(`node-${i}-${j}`).className = "node node-wall";
+            grid[i][j] = {
+              ...grid[i][j],
+              isWalkable: false,
+            };
+          }, 150 * (i + j));
+        }
       }
+
+      // return grid;
+    },
+
+    animatePathFindingAlgorithm: function (animation) {
+      for (let i = 0; i < animation.length; i++) {
+        setTimeout(() => {
+          const node = animation[i];
+
+          if (
+            node.x !== this.START_NODE_ROW ||
+            node.y !== this.START_NODE_COL
+          ) {
+            if (node.isDiscovered && node.isVisited && node.isPath)
+              document.getElementById(`node-${node.x}-${node.y}`).className =
+                "node node-shortest-path";
+            else if (node.isDiscovered && node.isVisited && !node.isPath)
+              document.getElementById(`node-${node.x}-${node.y}`).className =
+                "node node-visited";
+            else
+              document.getElementById(`node-${node.x}-${node.y}`).className =
+                "node node-discovered";
+          }
+        }, 50 * i);
+      }
+    },
+
+    animateMazeGenerator: function (animation) {
+      for (let i = 0; i < animation.length; i++) {
+        const node = animation[i];
+        setTimeout(() => {
+          document.getElementById(`node-${node.x}-${node.y}`).className =
+            "node";
+        }, 50 * i);
+
+        this.state.grid[node.x][node.y] = {
+          ...this.state.grid[node.x][node.y],
+          isWalkable: node.isWalkable,
+        };
+      }
+
+      console.log(this.state.grid);
     },
   },
 };
@@ -195,23 +347,22 @@ div.navbar-items.grow-4 {
 }
 
 div.navbar-items.order-1 {
-  order: 1
+  order: 1;
 }
 
 div.navbar-items.order-2 {
-  order: 2
+  order: 2;
 }
 
 div.navbar-items.order-3 {
-  order: 3
+  order: 3;
 }
 
 div.navbar-items.order-4 {
-  order: 4
+  order: 4;
 }
 
 .navbar > .navbar-items > .navbar-title {
   color: rgb(175, 216, 248);
-
 }
 </style>

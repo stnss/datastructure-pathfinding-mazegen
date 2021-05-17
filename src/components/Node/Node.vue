@@ -82,6 +82,39 @@ export default {
   }
 }
 
+/* .node-wall {
+  animation-name: walledNode;
+  animation-duration: 1.5s;
+  animation-timing-function: ease-out;
+  animation-delay: 0;
+  animation-direction: alternate;
+  animation-iteration-count: 1;
+  animation-fill-mode: forwards;
+  animation-play-state: running;
+}
+
+@keyframes walledNode {
+  0% {
+    transform: scale(0.3);
+    background-color: rgba(160, 0, 80, 0.75);
+    border-radius: 100%;
+  }
+
+  50% {
+    background-color: rgba(121, 1, 61, 0.75);
+  }
+
+  75% {
+    transform: scale(1.2);
+    background-color: rgba(41, 0, 21, 0.75);
+  }
+
+  100% {
+    transform: scale(1);
+  background-color: rgb(12, 53, 71);
+  }
+} */
+
 .node-discovered {
   animation-name: discoveredAnimation;
   animation-duration: 1.5s;
