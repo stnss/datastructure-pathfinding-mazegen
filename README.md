@@ -1,4 +1,4 @@
-# pathfinding
+# Pathfinding & Maze Generator
 
 ## Project setup
 ```
@@ -17,3 +17,20 @@ npm run build
 
 ### Customize configuration
 See [Configuration Reference](https://cli.vuejs.org/config/).
+
+## Uses Algorithm
+
+### Pathfinding Algorithm
+```
+A*
+Djikstra
+BFS
+DFS
+```
+
+### Maze Generator Algorithm
+```
+Recursive BackTracking
+Prim's
+Kruskal's
+```
