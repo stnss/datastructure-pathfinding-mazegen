@@ -3,6 +3,7 @@ export default class Node {
         this.x = _x
         this.y = _y
         this.isWalkable = _isWalkable
+        this.isWall = !_isWalkable
         this.isPath = false
         this.isVisited = false
         this.isDiscovered = false

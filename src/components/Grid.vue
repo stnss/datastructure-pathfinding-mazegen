@@ -33,7 +33,7 @@
           @change="changeMazeGeneratorAlgorithm($event)"
           :model="MAZE_GENERATION_ALGORITHM"
         >
-          <option value="1">Recursive Back Tracking Algorithm</option>
+          <option value="1">Recursive Backtracking Algorithm</option>
           <option value="2">Prim's Algorithm</option>
         </select>
       </div>
@@ -77,7 +77,8 @@
         :key="node"
         :col="node.y"
         :row="node.x"
-        :isWall="node.isWalkable"
+        :isWalkable="node.isWalkable"
+        :isWall="node.isWall"
         @click.left="onMouseLeftClick(node.x, node.y)"
         @click.right.prevent="onMouseRightClick(node.x, node.y)"
       />
@@ -141,12 +142,10 @@ export default {
       this.gridSize.x = content.clientHeight / 10;
       this.gridSize.y = content.clientWidth / 10;
 
-      console.log(this.gridSize)
-
       for (let row = 0; row < this.gridSize.x; row++) {
         const currentRow = [];
         for (let col = 0; col < this.gridSize.y; col++) {
-          currentRow.push(this.createNode(col, row, true));
+          currentRow.push(this.createNode(col, row, false));
         }
         grid.push(currentRow);
       }
@@ -279,15 +278,16 @@ export default {
       for (let i = 0; i < grid.length; i++) {
         for (let j = 0; j < grid[i].length; j++) {
           setTimeout(() => {
-            grid[i][j] = {
-              ...grid[i][j],
-              isWalkable: false,
-            };
+            document.getElementById(`node-${i}-${j}`).className =
+              "node node-wall";
           }, 150 * (i + j));
+
+          grid[i][j] = {
+            ...grid[i][j],
+            isWalkable: false,
+          };
         }
       }
-
-      // return grid;
     },
 
     animatePathFindingAlgorithm: function (animation) {
@@ -316,16 +316,21 @@ export default {
     animateMazeGenerator: function (animation) {
       for (let i = 0; i < animation.length; i++) {
         const node = animation[i];
-        setTimeout(() => {
-          document.getElementById(`node-${node.x}-${node.y}`).className =
-            "node";
-        }, 30 * i);
-
         this.state.grid[node.x][node.y] = {
           ...this.state.grid[node.x][node.y],
           isWalkable: node.isWalkable,
         };
       }
+
+      setTimeout(() => {
+        for (let i = 0; i < animation.length; i++) {
+          const node = animation[i];
+          setTimeout(() => {
+            document.getElementById(`node-${node.x}-${node.y}`).className =
+              "node";
+          }, 50 * i);
+        }
+      }, 150);
     },
   },
 };

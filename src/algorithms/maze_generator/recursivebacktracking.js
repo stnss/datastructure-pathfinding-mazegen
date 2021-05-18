@@ -17,8 +17,6 @@ export default class RecursiveBackTracking {
   };
 
   recursiveBackTracking = function(currentNode) {
-    // console.log("Current:", currentNode);
-    // currentNode.isWalkable = true;
     this.animation.push({
       x: currentNode.x,
       y: currentNode.y,

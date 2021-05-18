@@ -1,7 +1,7 @@
 <template>
   <div
     :id="`node-${row}-${col}`"
-    :className="`node`"
+    :className="`node ${className}`"
   ></div>
 </template>
 
@@ -10,8 +10,14 @@ export default {
   props: {
     row: Number,
     col: Number,
+    isWalkable: Boolean,
     isWall: Boolean
   },
+  data() {
+    return {
+      className: this.isWall ? "node-wall" : ""
+    }
+  }
 };
 </script>
 
